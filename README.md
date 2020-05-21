@@ -5,7 +5,7 @@
 * Supports GPU and CPU
 * Uses PlaidML (https://github.com/plaidml/plaidml)
 
-# Installation Dependencies:
+# Dependencies:
 * Python 3.6+
 * pip install -r req.txt
 
