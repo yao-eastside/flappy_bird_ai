@@ -114,23 +114,6 @@ def train_network(mode):
 
     s_t = get_init_stack(game_state)
 
-    # # get the first state by doing nothing and preprocess the image to 80x80x4
-    # do_nothing = np.zeros(ACTIONS)
-    # do_nothing[0] = 1
-    # x_t_colored, _, terminal = game_state.frame_step(do_nothing)
-
-    # x_t = skimage.color.rgb2gray(x_t_colored)
-    # x_t = skimage.transform.resize(x_t,(80,80))
-    # x_t = skimage.exposure.rescale_intensity(x_t,out_range=(0,255))
-
-    # x_t = x_t / 255.0
-
-    # s_t = np.stack((x_t, x_t, x_t, x_t), axis=2)
-    # #print (s_t.shape)
-
-    # #In Keras, need to reshape
-    # s_t = s_t.reshape(1, s_t.shape[0], s_t.shape[1], s_t.shape[2])  #1*80*80*4
-
     network, OBSERVE, epsilon = build_network_structure(mode)
 
     t = 0
@@ -157,19 +140,7 @@ def train_network(mode):
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / TOTAL_EXPLORE
 
         s_t1, r_t, terminal = get_next_stack(game_state, a_t, s_t)
-        # #run the selected action and observed next state and reward
-        # x_t1_colored, r_t, terminal = game_state.frame_step(a_t)
 
-        # x_t1 = skimage.color.rgb2gray(x_t1_colored)
-        # x_t1 = skimage.transform.resize(x_t1,(80,80))
-        # x_t1 = skimage.exposure.rescale_intensity(x_t1, out_range=(0, 255))
-
-        # x_t1 = x_t1 / 255.0
-
-        # x_t1 = x_t1.reshape(1, x_t1.shape[0], x_t1.shape[1], 1) #1x80x80x1
-        # s_t1 = np.append(x_t1, s_t[:, :, :, :3], axis=3)
-
-        # store the transition in D
         D.append((s_t, action_index, r_t, s_t1, terminal))
         if len(D) > REPLAY_MEMORY:
             D.popleft()
