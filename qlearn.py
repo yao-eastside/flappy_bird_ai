@@ -5,34 +5,35 @@ import sys
 from collections import deque
 from datetime import datetime
 
+import keras
 import numpy as np
-import skimage as skimage
+import skimage.color
+import skimage.exposure
+import skimage.transform
 from keras import layers, models
-from keras.optimizers import SGD, Adam
-from skimage import color, exposure, transform
 
 from game import wrapped_flappy_bird as game
 
-
 GAME = 'bird' # the name of the game being played for log files
-CONFIG = 'nothreshold'
 ACTIONS = 2 # number of valid actions
 GAMMA = 0.99 # decay rate of past observations
-OBSERVATION = 3200. # timesteps to observe before training
-EXPLORE = 30000. # 3000000. # frames over which to anneal epsilon
-FINAL_EPSILON = 0.0001 # final value of epsilon
+TOTAL_OBSERVATION = 3200. # timesteps to observe before training
+TOTAL_EXPLORE = 30000. # 3000000. # frames over which to anneal epsilon
 INITIAL_EPSILON = 0.1 # starting value of epsilon
-REPLAY_MEMORY = 50000 # number of previous transitions to remember
+FINAL_EPSILON = 0.0001 # final value of epsilon
+REPLAY_MEMORY = 20000 # 30000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
 FRAME_PER_ACTION = 1
 LEARNING_RATE = 1e-4
 
-img_rows , img_cols = 80, 80
-#Convert image into Black and white
-img_channels = 4 #We stack 4 frames
 
-def buildmodel():
-    print("Now we build the model")
+def build_model_structure():
+    print("Now we build the model structure")
+
+    img_rows, img_cols = 80, 80
+    #Convert image into Black and white
+    img_channels = 4 # We stack 4 frames
+
     model = models.Sequential()
     model.add(layers.Conv2D(32, (8, 8), activation='relu', strides=(4, 4), padding='same',input_shape=(img_rows,img_cols,img_channels)))  #80*80*4
     model.add(layers.Conv2D(64, (4, 4), activation='relu', strides=(2, 2), padding='same'))
@@ -41,14 +42,19 @@ def buildmodel():
     model.add(layers.Dense(512, activation='relu'))
     model.add(layers.Dense(2))
 
-    adam = Adam(lr=LEARNING_RATE)
-    model.compile(loss='mse',optimizer=adam)
-    print("We finish building the model")
+    model.compile(loss='mse',optimizer=keras.optimizers.Adam(lr=LEARNING_RATE))
+    print("We finish building the model structure")
     return model
 
-def trainNetwork(mode):
 
-    model = buildmodel()
+def save_model(model):
+    print("Now we save model")
+    model.save_weights("model.h5", overwrite=True)
+    with open("model.json", "w") as outfile:
+        json.dump(model.to_json(), outfile)
+
+
+def train_network(mode):
 
     # open up a game state to communicate with emulator
     game_state = game.GameState()
@@ -74,19 +80,18 @@ def trainNetwork(mode):
     s_t = s_t.reshape(1, s_t.shape[0], s_t.shape[1], s_t.shape[2])  #1*80*80*4
 
 
+    model = build_model_structure()
     if mode == 'test':
         print("testing mode")
-        OBSERVE = 999999999    # We keep observe, never train
+        OBSERVE = 999999999 # We keep observe, never train
         epsilon = FINAL_EPSILON
         print ("Now we load weight")
         model.load_weights("model.h5")
-        adam = Adam(lr=LEARNING_RATE)
-        model.compile(loss='mse',optimizer=adam)
         print ("Weight load successfully")
     else:
         assert mode == 'train'
         print("training mode")
-        OBSERVE = OBSERVATION
+        OBSERVE = TOTAL_OBSERVATION
         epsilon = INITIAL_EPSILON
 
     t = 0
@@ -110,7 +115,7 @@ def trainNetwork(mode):
 
         #We reduced the epsilon gradually
         if epsilon > FINAL_EPSILON and t > OBSERVE:
-            epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
+            epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / TOTAL_EXPLORE
 
         #run the selected action and observed next state and reward
         x_t1_colored, r_t, terminal = game_state.frame_step(a_t)
@@ -151,19 +156,14 @@ def trainNetwork(mode):
 
         # save progress every 10000 iterations
         if t % 1000 == 0:
-            print("Now we save model")
-            model.save_weights("model.h5", overwrite=True)
-            with open("model.json", "w") as outfile:
-                json.dump(model.to_json(), outfile)
+            save_model(model)
 
         # print info
-        state = ""
+        state = "train"
         if t <= OBSERVE:
             state = "observe"
-        elif t > OBSERVE and t <= OBSERVE + EXPLORE:
+        elif t > OBSERVE and t <= OBSERVE + TOTAL_EXPLORE:
             state = "explore"
-        else:
-            state = "train"
 
         now = datetime.now()
         print(now, "TIMESTEP", t, "/ STATE", state, \

@@ -14,5 +14,5 @@ else:
     parser.print_help()
     exit()
 
-from qlearn import trainNetwork
-trainNetwork(mode)
+from qlearn import train_network
+train_network(mode)
