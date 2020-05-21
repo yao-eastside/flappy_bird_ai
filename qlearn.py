@@ -10,7 +10,6 @@ import argparse
 import skimage as skimage
 from skimage import transform, color, exposure
 from skimage.transform import rotate
-from skimage.viewer import ImageViewer
 import sys
 sys.path.append("game/")
 import wrapped_flappy_bird as game
@@ -25,7 +24,6 @@ from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from keras.optimizers import SGD , Adam
-import tensorflow as tf
 
 GAME = 'bird' # the name of the game being played for log files
 CONFIG = 'nothreshold'
@@ -63,7 +61,10 @@ def buildmodel():
     print("We finish building the model")
     return model
 
-def trainNetwork(model,args):
+def trainNetwork(mode):
+        
+    model = buildmodel()
+    
     # open up a game state to communicate with emulator
     game_state = game.GameState()
 
@@ -88,16 +89,18 @@ def trainNetwork(model,args):
     s_t = s_t.reshape(1, s_t.shape[0], s_t.shape[1], s_t.shape[2])  #1*80*80*4
 
 
-
-    if args['mode'] == 'Run':
-        OBSERVE = 999999999    #We keep observe, never train
+    if mode == 'run':
+        print("running mode")
+        OBSERVE = 999999999    # We keep observe, never train
         epsilon = FINAL_EPSILON
         print ("Now we load weight")
         model.load_weights("model.h5")
         adam = Adam(lr=LEARNING_RATE)
         model.compile(loss='mse',optimizer=adam)
         print ("Weight load successfully")
-    else:                       #We go to training mode
+    else:
+        assert mode == 'train'
+        print("training mode")
         OBSERVE = OBSERVATION
         epsilon = INITIAL_EPSILON
 
@@ -184,22 +187,3 @@ def trainNetwork(model,args):
 
     print("Episode finished!")
     print("************************")
-
-def playGame(args):
-    model = buildmodel()
-    trainNetwork(model,args)
-
-def main():
-    parser = argparse.ArgumentParser(description='Description of your program')
-    parser.add_argument('-m','--mode', help='Train / Run', required=True)
-    args = vars(parser.parse_args())
-    playGame(args)
-
-if __name__ == "__main__":
-    # config = tf.compat.v1.ConfigProto()
-    # # tf.compat.v1.Session()
-    # config.gpu_options.allow_growth = True
-    # sess = tf.compat.v1.Session(config=config)
-    # from keras import backend as K
-    # tf.compat.v1.keras.backend.set_session(sess)
-    main()
