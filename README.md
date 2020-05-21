@@ -11,18 +11,18 @@
 
 # How to Run?
 
-Train the network
+* Train the network
 ```
 python run.py -m train
 ```
 If you need to train again from scratch, delete model.h5 then run the above command.
 
-Test without run (you need to have a file model.h5)
+* Test without run (you need to have a file model.h5)
 ```
 python run.py -m run
 ```
 
-For help:
+* For help:
 ```
 python run.py -h
 ```
