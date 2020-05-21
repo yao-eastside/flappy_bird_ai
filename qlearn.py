@@ -113,6 +113,24 @@ def train_network(D, network):
     return loss
 
 
+def logging(t, network, OBSERVE, epsilon, action_index, r_t, Q_sa, loss):
+    # save progress every 10000 iterations
+    if t % 1000 == 0:
+        save_model(network)
+
+    # print info
+    state = "train"
+    if t <= OBSERVE:
+        state = "observe"
+    elif t > OBSERVE and t <= OBSERVE + TOTAL_EXPLORE:
+        state = "explore"
+
+    now = datetime.now()
+    print(now, "TIMESTEP", t, "/ STATE", state, \
+        "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t, \
+        "/ Q_MAX " , np.max(Q_sa), "/ Loss ", loss)
+
+
 def save_model(network):
     print("Now we save model")
     network.save_weights("model.h5", overwrite=True)
@@ -120,7 +138,25 @@ def save_model(network):
         json.dump(network.to_json(), outfile)
 
 
+def chose_action(network, s_t, a_t, t, epsilon):
+    #choose an action epsilon greedy
+    if t % FRAME_PER_ACTION == 0:
+        if random.random() <= epsilon:
+            print("----------Random Action----------")
+            action_index = random.randrange(ACTIONS)
+            a_t[action_index] = 1
+        else:
+            q = network.predict(s_t)       #input a stack of 4 images, get the prediction
+            max_Q = np.argmax(q)
+            action_index = max_Q
+            a_t[max_Q] = 1
+    else:
+        assert False
+
+
 def q_learning(mode):
+
+    network, OBSERVE, epsilon = build_network_structure(mode)
 
     # open up a game state to communicate with emulator
     game_state = game.GameState()
@@ -130,28 +166,11 @@ def q_learning(mode):
 
     s_t = get_init_stack(game_state)
 
-    network, OBSERVE, epsilon = build_network_structure(mode)
-
     t = 0
     while (True):
-        loss = 0
-        Q_sa = 0
-        action_index = 0
-        r_t = 0
+        loss, Q_sa, action_index, r_t = 0, 0, 0, 0
         a_t = np.zeros([ACTIONS])
-        #choose an action epsilon greedy
-        if t % FRAME_PER_ACTION == 0:
-            if random.random() <= epsilon:
-                print("----------Random Action----------")
-                action_index = random.randrange(ACTIONS)
-                a_t[action_index] = 1
-            else:
-                q = network.predict(s_t)       #input a stack of 4 images, get the prediction
-                max_Q = np.argmax(q)
-                action_index = max_Q
-                a_t[max_Q] = 1
-        else:
-            assert False
+        chose_action(network, s_t, a_t, t, epsilon)
 
         # We reduced the epsilon gradually
         if epsilon > FINAL_EPSILON and t > OBSERVE:
@@ -163,41 +182,13 @@ def q_learning(mode):
         if len(D) > REPLAY_MEMORY:
             D.popleft()
 
-        #only train if done observing
         if t > OBSERVE:
+            # only train if done observing
             loss += train_network(D, network)
 
-            # #sample a minibatch to train on
-            # minibatch = random.sample(D, BATCH)
+        s_t, t = s_t1, t+1
 
-            # #Now we do the experience replay
-            # state_t, action_t, reward_t, state_t1, terminal = zip(*minibatch)
-            # state_t = np.concatenate(state_t)
-            # state_t1 = np.concatenate(state_t1)
-            # targets = network.predict(state_t)
-            # Q_sa = network.predict(state_t1)
-            # targets[range(BATCH), action_t] = reward_t + GAMMA*np.max(Q_sa, axis=1)*np.invert(terminal)
-
-            # loss += network.train_on_batch(state_t, targets)
-
-        s_t = s_t1
-        t = t + 1
-
-        # save progress every 10000 iterations
-        if t % 1000 == 0:
-            save_model(network)
-
-        # print info
-        state = "train"
-        if t <= OBSERVE:
-            state = "observe"
-        elif t > OBSERVE and t <= OBSERVE + TOTAL_EXPLORE:
-            state = "explore"
-
-        now = datetime.now()
-        print(now, "TIMESTEP", t, "/ STATE", state, \
-            "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t, \
-            "/ Q_MAX " , np.max(Q_sa), "/ Loss ", loss)
+        logging(t, network, OBSERVE, epsilon, action_index, r_t, Q_sa, loss)
 
     print("Episode finished!")
     print("************************")
