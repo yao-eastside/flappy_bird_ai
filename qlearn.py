@@ -27,31 +27,45 @@ FRAME_PER_ACTION = 1
 LEARNING_RATE = 1e-4
 
 
-def build_model_structure():
+def build_network_structure(mode):
     print("Now we build the model structure")
 
     img_rows, img_cols = 80, 80
     #Convert image into Black and white
     img_channels = 4 # We stack 4 frames
 
-    model = models.Sequential()
-    model.add(layers.Conv2D(32, (8, 8), activation='relu', strides=(4, 4), padding='same',input_shape=(img_rows,img_cols,img_channels)))  #80*80*4
-    model.add(layers.Conv2D(64, (4, 4), activation='relu', strides=(2, 2), padding='same'))
-    model.add(layers.Conv2D(64, (3, 3), activation='relu', strides=(1, 1), padding='same'))
-    model.add(layers.Flatten())
-    model.add(layers.Dense(512, activation='relu'))
-    model.add(layers.Dense(2))
+    network = models.Sequential()
+    network.add(layers.Conv2D(32, (8, 8), activation='relu', strides=(4, 4), padding='same',input_shape=(img_rows,img_cols,img_channels)))  #80*80*4
+    network.add(layers.Conv2D(64, (4, 4), activation='relu', strides=(2, 2), padding='same'))
+    network.add(layers.Conv2D(64, (3, 3), activation='relu', strides=(1, 1), padding='same'))
+    network.add(layers.Flatten())
+    network.add(layers.Dense(512, activation='relu'))
+    network.add(layers.Dense(2))
 
-    model.compile(loss='mse',optimizer=keras.optimizers.Adam(lr=LEARNING_RATE))
+    network.compile(loss='mse',optimizer=keras.optimizers.Adam(lr=LEARNING_RATE))
     print("We finish building the model structure")
-    return model
+
+    OBSERVE = TOTAL_OBSERVATION
+    epsilon = INITIAL_EPSILON
+    if mode == 'test':
+        print("testing mode")
+        OBSERVE = 999999999 # We keep observe, never train
+        epsilon = FINAL_EPSILON
+        print ("Now we load weight")
+        network.load_weights("model.h5")
+        print ("Weight load successfully")
+    else:
+        assert mode == 'train'
+        print("training mode")
+
+    return network, OBSERVE, epsilon
 
 
-def save_model(model):
+def save_model(network):
     print("Now we save model")
-    model.save_weights("model.h5", overwrite=True)
+    network.save_weights("model.h5", overwrite=True)
     with open("model.json", "w") as outfile:
-        json.dump(model.to_json(), outfile)
+        json.dump(network.to_json(), outfile)
 
 
 def train_network(mode):
@@ -79,20 +93,7 @@ def train_network(mode):
     #In Keras, need to reshape
     s_t = s_t.reshape(1, s_t.shape[0], s_t.shape[1], s_t.shape[2])  #1*80*80*4
 
-
-    model = build_model_structure()
-    if mode == 'test':
-        print("testing mode")
-        OBSERVE = 999999999 # We keep observe, never train
-        epsilon = FINAL_EPSILON
-        print ("Now we load weight")
-        model.load_weights("model.h5")
-        print ("Weight load successfully")
-    else:
-        assert mode == 'train'
-        print("training mode")
-        OBSERVE = TOTAL_OBSERVATION
-        epsilon = INITIAL_EPSILON
+    network, OBSERVE, epsilon = build_network_structure(mode)
 
     t = 0
     while (True):
@@ -108,7 +109,7 @@ def train_network(mode):
                 action_index = random.randrange(ACTIONS)
                 a_t[action_index] = 1
             else:
-                q = model.predict(s_t)       #input a stack of 4 images, get the prediction
+                q = network.predict(s_t)       #input a stack of 4 images, get the prediction
                 max_Q = np.argmax(q)
                 action_index = max_Q
                 a_t[max_Q] = 1
@@ -124,9 +125,7 @@ def train_network(mode):
         x_t1 = skimage.transform.resize(x_t1,(80,80))
         x_t1 = skimage.exposure.rescale_intensity(x_t1, out_range=(0, 255))
 
-
         x_t1 = x_t1 / 255.0
-
 
         x_t1 = x_t1.reshape(1, x_t1.shape[0], x_t1.shape[1], 1) #1x80x80x1
         s_t1 = np.append(x_t1, s_t[:, :, :, :3], axis=3)
@@ -145,18 +144,18 @@ def train_network(mode):
             state_t, action_t, reward_t, state_t1, terminal = zip(*minibatch)
             state_t = np.concatenate(state_t)
             state_t1 = np.concatenate(state_t1)
-            targets = model.predict(state_t)
-            Q_sa = model.predict(state_t1)
+            targets = network.predict(state_t)
+            Q_sa = network.predict(state_t1)
             targets[range(BATCH), action_t] = reward_t + GAMMA*np.max(Q_sa, axis=1)*np.invert(terminal)
 
-            loss += model.train_on_batch(state_t, targets)
+            loss += network.train_on_batch(state_t, targets)
 
         s_t = s_t1
         t = t + 1
 
         # save progress every 10000 iterations
         if t % 1000 == 0:
-            save_model(model)
+            save_model(network)
 
         # print info
         state = "train"
