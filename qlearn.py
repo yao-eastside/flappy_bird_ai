@@ -6,13 +6,12 @@ os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
 
 from datetime import datetime
 
-import argparse
 import skimage as skimage
 from skimage import transform, color, exposure
 from skimage.transform import rotate
 import sys
-sys.path.append("game/")
-import wrapped_flappy_bird as game
+from game import wrapped_flappy_bird as game
+
 import random
 import numpy as np
 from collections import deque
@@ -62,9 +61,9 @@ def buildmodel():
     return model
 
 def trainNetwork(mode):
-        
+
     model = buildmodel()
-    
+
     # open up a game state to communicate with emulator
     game_state = game.GameState()
 
