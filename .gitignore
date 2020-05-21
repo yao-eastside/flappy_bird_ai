@@ -130,3 +130,5 @@ dmypy.json
 
 # tmp files
 *~
+model.h5
+backup/
