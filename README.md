@@ -1,4 +1,4 @@
-# Deep Reinforcement Learning for Flappy Bird
+# Playing Flappy Bird with Deep Reinforcement Learning
 
 # Highlights:
 * Supports macOS, Linux and Windows
