@@ -1,4 +1,9 @@
-# Deep Reinforcement Learning for Flappy Bird on macOS
+# Deep Reinforcement Learning for Flappy Bird
+
+# Platforms:
+* macOS
+* Linux
+* Windows
 
 # Installation Dependencies:
 * Python 3.6+
