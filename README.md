@@ -1,9 +1,9 @@
 # Deep Reinforcement Learning for Flappy Bird
 
-# Platforms:
-* macOS
-* Linux
-* Windows
+# Highlights:
+* Supports macOS, Linux and Windows
+* Supports GPU and CPU
+* Uses PlaidML (https://github.com/plaidml/plaidml)
 
 # Installation Dependencies:
 * Python 3.6+
