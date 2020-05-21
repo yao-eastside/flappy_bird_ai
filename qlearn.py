@@ -18,12 +18,9 @@ from collections import deque
 
 import json
 from keras.initializers import normal, identity
-from keras.models import model_from_json
-from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers.convolutional import Convolution2D, MaxPooling2D
+from keras import models
+from keras import layers
 from keras.optimizers import SGD , Adam
-
 GAME = 'bird' # the name of the game being played for log files
 CONFIG = 'nothreshold'
 ACTIONS = 2 # number of valid actions
@@ -43,17 +40,13 @@ img_channels = 4 #We stack 4 frames
 
 def buildmodel():
     print("Now we build the model")
-    model = Sequential()
-    model.add(Convolution2D(32, 8, 8, subsample=(4, 4), border_mode='same',input_shape=(img_rows,img_cols,img_channels)))  #80*80*4
-    model.add(Activation('relu'))
-    model.add(Convolution2D(64, 4, 4, subsample=(2, 2), border_mode='same'))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(64, 3, 3, subsample=(1, 1), border_mode='same'))
-    model.add(Activation('relu'))
-    model.add(Flatten())
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dense(2))
+    model = models.Sequential()
+    model.add(layers.Conv2D(32, (8, 8), activation='relu', strides=(4, 4), padding='same',input_shape=(img_rows,img_cols,img_channels)))  #80*80*4
+    model.add(layers.Conv2D(64, (4, 4), activation='relu', strides=(2, 2), padding='same'))
+    model.add(layers.Conv2D(64, (3, 3), activation='relu', strides=(1, 1), padding='same'))
+    model.add(layers.Flatten())
+    model.add(layers.Dense(512, activation='relu'))
+    model.add(layers.Dense(2))
 
     adam = Adam(lr=LEARNING_RATE)
     model.compile(loss='mse',optimizer=adam)
