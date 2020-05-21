@@ -19,7 +19,7 @@ If you need to train again from scratch, delete model.h5 then run the above comm
 
 * Test without run (you need to have a file model.h5)
 ```
-python run.py -m run
+python run.py -m test
 ```
 
 * For help:
