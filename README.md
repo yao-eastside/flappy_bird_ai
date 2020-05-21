@@ -12,10 +12,10 @@
 # How to Run?
 
 ```
-python qlearn.py -m run
+python run.py -m run
 ```
 
-If you want to train the network from beginning, delete the model.h5 and run qlearn.py -m train
+If you want to train the network from beginning, delete the model.h5 and run run.py -m train
 
 # Credits
 Modified from https://github.com/yanpanlau/Keras-FlappyBird
