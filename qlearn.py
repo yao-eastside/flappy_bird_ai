@@ -97,6 +97,22 @@ def get_next_stack(game_state, a_t, s_t):
     return s_t1, r_t, terminal
 
 
+def train_network(D, network):
+    #sample a minibatch to train on
+    minibatch = random.sample(D, BATCH)
+
+    #Now we do the experience replay
+    state_t, action_t, reward_t, state_t1, terminal = zip(*minibatch)
+    state_t = np.concatenate(state_t)
+    state_t1 = np.concatenate(state_t1)
+    targets = network.predict(state_t)
+    Q_sa = network.predict(state_t1)
+    targets[range(BATCH), action_t] = reward_t + GAMMA*np.max(Q_sa, axis=1)*np.invert(terminal)
+
+    loss = network.train_on_batch(state_t, targets)
+    return loss
+
+
 def save_model(network):
     print("Now we save model")
     network.save_weights("model.h5", overwrite=True)
@@ -104,7 +120,7 @@ def save_model(network):
         json.dump(network.to_json(), outfile)
 
 
-def train_network(mode):
+def q_learning(mode):
 
     # open up a game state to communicate with emulator
     game_state = game.GameState()
@@ -134,8 +150,10 @@ def train_network(mode):
                 max_Q = np.argmax(q)
                 action_index = max_Q
                 a_t[max_Q] = 1
+        else:
+            assert False
 
-        #We reduced the epsilon gradually
+        # We reduced the epsilon gradually
         if epsilon > FINAL_EPSILON and t > OBSERVE:
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / TOTAL_EXPLORE
 
@@ -147,18 +165,20 @@ def train_network(mode):
 
         #only train if done observing
         if t > OBSERVE:
-            #sample a minibatch to train on
-            minibatch = random.sample(D, BATCH)
+            loss += train_network(D, network)
 
-            #Now we do the experience replay
-            state_t, action_t, reward_t, state_t1, terminal = zip(*minibatch)
-            state_t = np.concatenate(state_t)
-            state_t1 = np.concatenate(state_t1)
-            targets = network.predict(state_t)
-            Q_sa = network.predict(state_t1)
-            targets[range(BATCH), action_t] = reward_t + GAMMA*np.max(Q_sa, axis=1)*np.invert(terminal)
+            # #sample a minibatch to train on
+            # minibatch = random.sample(D, BATCH)
 
-            loss += network.train_on_batch(state_t, targets)
+            # #Now we do the experience replay
+            # state_t, action_t, reward_t, state_t1, terminal = zip(*minibatch)
+            # state_t = np.concatenate(state_t)
+            # state_t1 = np.concatenate(state_t1)
+            # targets = network.predict(state_t)
+            # Q_sa = network.predict(state_t1)
+            # targets[range(BATCH), action_t] = reward_t + GAMMA*np.max(Q_sa, axis=1)*np.invert(terminal)
+
+            # loss += network.train_on_batch(state_t, targets)
 
         s_t = s_t1
         t = t + 1
@@ -181,3 +201,8 @@ def train_network(mode):
 
     print("Episode finished!")
     print("************************")
+
+
+if __name__ == '__main__':
+    TOTAL_OBSERVATION = 32
+    q_learning('train')
