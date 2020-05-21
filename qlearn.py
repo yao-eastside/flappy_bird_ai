@@ -1,26 +1,19 @@
-#!/usr/bin/env python
-from __future__ import print_function
-
+import json
 import os
-os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
-
+import random
+import sys
+from collections import deque
 from datetime import datetime
 
+import numpy as np
 import skimage as skimage
-from skimage import transform, color, exposure
-from skimage.transform import rotate
-import sys
+from keras import layers, models
+from keras.optimizers import SGD, Adam
+from skimage import color, exposure, transform
+
 from game import wrapped_flappy_bird as game
 
-import random
-import numpy as np
-from collections import deque
 
-import json
-from keras.initializers import normal, identity
-from keras import models
-from keras import layers
-from keras.optimizers import SGD , Adam
 GAME = 'bird' # the name of the game being played for log files
 CONFIG = 'nothreshold'
 ACTIONS = 2 # number of valid actions
@@ -81,8 +74,8 @@ def trainNetwork(mode):
     s_t = s_t.reshape(1, s_t.shape[0], s_t.shape[1], s_t.shape[2])  #1*80*80*4
 
 
-    if mode == 'run':
-        print("running mode")
+    if mode == 'test':
+        print("testing mode")
         OBSERVE = 999999999    # We keep observe, never train
         epsilon = FINAL_EPSILON
         print ("Now we load weight")

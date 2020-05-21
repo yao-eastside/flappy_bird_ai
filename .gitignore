@@ -131,4 +131,6 @@ dmypy.json
 # tmp files
 *~
 model.h5
+model.json
+output.txt
 backup/
