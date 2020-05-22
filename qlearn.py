@@ -176,7 +176,7 @@ def q_learning(mode):
     # store the previous observations in replay memory
     queue = deque()
 
-    s_t = get_init_stack(game_state)
+    s_t0 = get_init_stack(game_state)
 
     t = 0
     time0 = time.time()
@@ -184,28 +184,28 @@ def q_learning(mode):
     while (True):
         action_index, r_t = 0, 0
         a_t = np.zeros([ACTIONS])
-        chose_action(network, s_t, a_t, t, epsilon)
+        chose_action(network, s_t0, a_t, t, epsilon)
 
         # We reduced the epsilon gradually
         if epsilon > FINAL_EPSILON and t > observe:
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / TOTAL_EXPLORE
 
-        s_t1, r_t, terminal = get_next_stack(game_state, a_t, s_t)
+        s_t1, r_t, terminal = get_next_stack(game_state, a_t, s_t0)
 
-        queue.append((s_t, action_index, r_t, s_t1, terminal))
+        queue.append((s_t0, action_index, r_t, s_t1, terminal))
         if len(queue) > REPLAY_MEMORY:
             queue.popleft()
 
         if t > observe:
             # only train if done observing
-            loss, Q_sa = train_network(queue, network)
+            loss, q_sa = train_network(queue, network)
         else:
-            loss, Q_sa = 0, 0
+            loss, q_sa = 0, 0
 
         total_loss += loss
-        s_t, t = s_t1, t+1
+        s_t0, t = s_t1, t + 1
 
-        logging(t, time0, network, observe, epsilon, action_index, r_t, Q_sa, loss, total_loss)
+        logging(t, time0, network, observe, epsilon, action_index, r_t, q_sa, loss, total_loss)
 
     print("Episode finished!")
     print("************************")
