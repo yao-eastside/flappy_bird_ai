@@ -1,16 +1,16 @@
 # Playing Flappy Bird with Deep Reinforcement Learning
-* watch the training on youtube: https://www.youtube.com/watch?v=Yfe5eLKxr7M
+Watch the training on youtube: https://www.youtube.com/watch?v=Yfe5eLKxr7M
 
-# Highlights:
+## Highlights:
 * Supports macOS, Linux and Windows
 * Supports GPU and CPU
 * Uses PlaidML (https://github.com/plaidml/plaidml)
 
-# Dependencies:
+## Dependencies:
 * Python 3.6+
 * pip install -r req.txt
 
-# How to Run?
+## How to Run?
 
 * Train the network
 ```
@@ -28,5 +28,5 @@ python run.py -m test
 python run.py -h
 ```
 
-# Credits
+## Credits
 Modified from https://github.com/yanpanlau/Keras-FlappyBird
