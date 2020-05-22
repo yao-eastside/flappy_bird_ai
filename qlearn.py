@@ -151,14 +151,13 @@ def chose_action(network, s_t, a_t, t, epsilon):
         if random.random() <= epsilon:
             print("----------Random Action----------")
             action_index = random.randrange(ACTIONS)
-            a_t[action_index] = 1
         else:
             q = network.predict(s_t)       #input a stack of 4 images, get the prediction
             max_Q = np.argmax(q)
             action_index = max_Q
-            a_t[max_Q] = 1
     else:
         assert False
+    return action_index
 
 
 def q_learning(mode):
@@ -183,7 +182,8 @@ def q_learning(mode):
     while (True):
         action_index, r_t = 0, 0
         a_t = np.zeros([ACTIONS])
-        chose_action(network, s_t0, a_t, t, epsilon)
+        action_index = chose_action(network, s_t0, a_t, t, epsilon)
+        a_t[action_index] = 1
 
         # We reduced the epsilon gradually
         if epsilon > FINAL_EPSILON and t > observe:
