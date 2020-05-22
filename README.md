@@ -1,5 +1,5 @@
 # Playing Flappy Bird with Deep Reinforcement Learning
-Watch the training on youtube: https://www.youtube.com/watch?v=Yfe5eLKxr7M
+Watch the training process on youtube: https://www.youtube.com/watch?v=Yfe5eLKxr7M
 
 ## Highlights:
 * Supports macOS, Linux and Windows
