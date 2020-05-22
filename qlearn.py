@@ -28,7 +28,7 @@ FRAME_PER_ACTION = 1
 LEARNING_RATE = 1e-4
 
 
-def init_network(mode, OBSERVE, epsilon):
+def init_network(mode, observe, epsilon):
     print("Now we build the model structure")
 
     img_rows, img_cols = 80, 80
