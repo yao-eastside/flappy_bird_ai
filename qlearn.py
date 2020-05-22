@@ -2,8 +2,9 @@ import json
 import os
 import random
 import sys
+import time
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import keras
 import numpy as np
@@ -27,7 +28,7 @@ FRAME_PER_ACTION = 1
 LEARNING_RATE = 1e-4
 
 
-def build_network_structure(mode):
+def init_network(mode, OBSERVE, epsilon):
     print("Now we build the model structure")
 
     img_rows, img_cols = 80, 80
@@ -45,8 +46,6 @@ def build_network_structure(mode):
     network.compile(loss='mse',optimizer=keras.optimizers.Adam(lr=LEARNING_RATE))
     print("We finish building the model structure")
 
-    OBSERVE = TOTAL_OBSERVATION
-    epsilon = INITIAL_EPSILON
     if mode == 'test':
         print("testing mode")
         OBSERVE = 999999999 # We keep observe, never train
@@ -58,7 +57,7 @@ def build_network_structure(mode):
         assert mode == 'train'
         print("training mode")
 
-    return network, OBSERVE, epsilon
+    return network
 
 
 def get_init_stack(game_state):
@@ -97,9 +96,9 @@ def get_next_stack(game_state, a_t, s_t):
     return s_t1, r_t, terminal
 
 
-def train_network(D, network):
+def train_network(queue, network):
     #sample a minibatch to train on
-    minibatch = random.sample(D, BATCH)
+    minibatch = random.sample(queue, BATCH)
 
     #Now we do the experience replay
     state_t, action_t, reward_t, state_t1, terminal = zip(*minibatch)
@@ -110,10 +109,10 @@ def train_network(D, network):
     targets[range(BATCH), action_t] = reward_t + GAMMA*np.max(Q_sa, axis=1)*np.invert(terminal)
 
     loss = network.train_on_batch(state_t, targets)
-    return loss
+    return loss, Q_sa
 
 
-def logging(t, network, OBSERVE, epsilon, action_index, r_t, Q_sa, loss):
+def logging(t, time0, network, OBSERVE, epsilon, action_index, r_t, Q_sa, loss, total_loss):
     # save progress every 10000 iterations
     if t % 1000 == 0:
         save_model(network)
@@ -126,9 +125,18 @@ def logging(t, network, OBSERVE, epsilon, action_index, r_t, Q_sa, loss):
         state = "explore"
 
     now = datetime.now()
-    print(now, "TIMESTEP", t, "/ STATE", state, \
-        "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t, \
-        "/ Q_MAX " , np.max(Q_sa), "/ Loss ", loss)
+    print(
+        now,
+        "timespent:", str(timedelta(seconds=time.time() - time0)),
+        "TIMESTEP:", t,
+        "STATE:", state,
+        "EPSILON:", epsilon,
+        "ACTION:", action_index,
+        "REWARD:", r_t,
+        "Q_MAX:" , np.max(Q_sa),
+        "Loss:", loss,
+        "avgloss:", total_loss/(t+1)
+    )
 
 
 def save_model(network):
@@ -156,19 +164,25 @@ def chose_action(network, s_t, a_t, t, epsilon):
 
 def q_learning(mode):
 
-    network, OBSERVE, epsilon = build_network_structure(mode)
+    OBSERVE = TOTAL_OBSERVATION
+    epsilon = INITIAL_EPSILON
+
+    # init network
+    network = init_network(mode, OBSERVE, epsilon)
 
     # open up a game state to communicate with emulator
     game_state = game.GameState()
 
     # store the previous observations in replay memory
-    D = deque()
+    queue = deque()
 
     s_t = get_init_stack(game_state)
 
     t = 0
+    time0 = time.time()
+    total_loss = 0
     while (True):
-        loss, Q_sa, action_index, r_t = 0, 0, 0, 0
+        action_index, r_t = 0, 0
         a_t = np.zeros([ACTIONS])
         chose_action(network, s_t, a_t, t, epsilon)
 
@@ -178,17 +192,20 @@ def q_learning(mode):
 
         s_t1, r_t, terminal = get_next_stack(game_state, a_t, s_t)
 
-        D.append((s_t, action_index, r_t, s_t1, terminal))
-        if len(D) > REPLAY_MEMORY:
-            D.popleft()
+        queue.append((s_t, action_index, r_t, s_t1, terminal))
+        if len(queue) > REPLAY_MEMORY:
+            queue.popleft()
 
         if t > OBSERVE:
             # only train if done observing
-            loss += train_network(D, network)
+            loss, Q_sa = train_network(queue, network)
+        else:
+            loss, Q_sa = 0, 0
 
+        total_loss += loss
         s_t, t = s_t1, t+1
 
-        logging(t, network, OBSERVE, epsilon, action_index, r_t, Q_sa, loss)
+        logging(t, time0, network, OBSERVE, epsilon, action_index, r_t, Q_sa, loss, total_loss)
 
     print("Episode finished!")
     print("************************")
