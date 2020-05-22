@@ -18,11 +18,11 @@ from game import wrapped_flappy_bird as game
 GAME = 'bird' # the name of the game being played for log files
 ACTIONS = 2 # number of valid actions
 GAMMA = 0.99 # decay rate of past observations
-TOTAL_OBSERVATION = 3200. # timesteps to observe before training
-TOTAL_EXPLORE = 30000. # 3000000. # frames over which to anneal epsilon
+TOTAL_OBSERVATION = 3_200 # timesteps to observe before training
+TOTAL_EXPLORE = 30_000 # 3000000. # frames over which to anneal epsilon
 INITIAL_EPSILON = 0.1 # starting value of epsilon
 FINAL_EPSILON = 0.0001 # final value of epsilon
-REPLAY_MEMORY = 20000 # 30000 # number of previous transitions to remember
+REPLAY_MEMORY = 20_000 # 30000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
 FRAME_PER_ACTION = 1
 LEARNING_RATE = 1e-4
@@ -48,7 +48,7 @@ def init_network(mode, OBSERVE, epsilon):
 
     if mode == 'test':
         print("testing mode")
-        OBSERVE = 999999999 # We keep observe, never train
+        observe = 999999999 # We keep observe, never train
         epsilon = FINAL_EPSILON
         print ("Now we load weight")
         network.load_weights("model.h5")
@@ -112,16 +112,16 @@ def train_network(queue, network):
     return loss, Q_sa
 
 
-def logging(t, time0, network, OBSERVE, epsilon, action_index, r_t, Q_sa, loss, total_loss):
+def logging(t, time0, network, observe, epsilon, action_index, r_t, Q_sa, loss, total_loss):
     # save progress every 10000 iterations
     if t % 1000 == 0:
         save_model(network)
 
     # print info
     state = "train"
-    if t <= OBSERVE:
+    if t <= observe:
         state = "observe"
-    elif t > OBSERVE and t <= OBSERVE + TOTAL_EXPLORE:
+    elif t > observe and t <= observe + TOTAL_EXPLORE:
         state = "explore"
 
     now = datetime.now()
@@ -164,11 +164,11 @@ def chose_action(network, s_t, a_t, t, epsilon):
 
 def q_learning(mode):
 
-    OBSERVE = TOTAL_OBSERVATION
+    observe = TOTAL_OBSERVATION
     epsilon = INITIAL_EPSILON
 
     # init network
-    network = init_network(mode, OBSERVE, epsilon)
+    network = init_network(mode, observe, epsilon)
 
     # open up a game state to communicate with emulator
     game_state = game.GameState()
@@ -187,7 +187,7 @@ def q_learning(mode):
         chose_action(network, s_t, a_t, t, epsilon)
 
         # We reduced the epsilon gradually
-        if epsilon > FINAL_EPSILON and t > OBSERVE:
+        if epsilon > FINAL_EPSILON and t > observe:
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / TOTAL_EXPLORE
 
         s_t1, r_t, terminal = get_next_stack(game_state, a_t, s_t)
@@ -196,7 +196,7 @@ def q_learning(mode):
         if len(queue) > REPLAY_MEMORY:
             queue.popleft()
 
-        if t > OBSERVE:
+        if t > observe:
             # only train if done observing
             loss, Q_sa = train_network(queue, network)
         else:
@@ -205,7 +205,7 @@ def q_learning(mode):
         total_loss += loss
         s_t, t = s_t1, t+1
 
-        logging(t, time0, network, OBSERVE, epsilon, action_index, r_t, Q_sa, loss, total_loss)
+        logging(t, time0, network, observe, epsilon, action_index, r_t, Q_sa, loss, total_loss)
 
     print("Episode finished!")
     print("************************")
