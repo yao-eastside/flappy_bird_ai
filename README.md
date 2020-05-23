@@ -28,9 +28,10 @@ python run.py -m test
 python run.py -h
 ```
 
+## Learn More about Reinforcement Learning
+* https://www.youtube.com/watch?v=lvoHnicueoE
+
 ## Credits
 Modified from https://github.com/yanpanlau/Keras-FlappyBird
 
-## To Learn More about Reinforcement Learning
-* https://www.youtube.com/watch?v=lvoHnicueoE
 
