@@ -30,6 +30,7 @@ python run.py -h
 
 ## Learn More about Reinforcement Learning
 * https://www.youtube.com/watch?v=lvoHnicueoE
+* http://cs231n.stanford.edu/slides/2017/cs231n_2017_lecture14.pdf
 
 ## Credits
 Modified from https://github.com/yanpanlau/Keras-FlappyBird
