@@ -1,0 +1,6 @@
+{
+    "PLAIDML_DEVICE_IDS":[
+        "metal_intel(r)_uhd_graphics_630.0"
+    ],
+    "PLAIDML_EXPERIMENTAL":false
+}
