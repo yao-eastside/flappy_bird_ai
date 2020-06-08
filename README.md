@@ -14,18 +14,13 @@
 
 * Train the network
 ```
-python run.py -m train
+python train.py
 ```
-If you need to train again from scratch, delete model.h5 then run the above command.
+It will generate a few h5 files you can use in the test stage.
 
 * Test (you need to have "model.h5" created from training)
 ```
-python run.py -m test
-```
-
-* For help:
-```
-python run.py -h
+python test.py <model-file-name.h5>
 ```
 
 ## Learn More about Reinforcement Learning
