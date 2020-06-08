@@ -19,7 +19,7 @@ from util import logging
 
 ACTIONS = 2 # number of valid actions
 GAMMA = 0.99 # decay rate of past observations
-TOTAL_OBSERVATION = 3_200 # timesteps to observe before training
+# TOTAL_OBSERVATION = 3_200 # timesteps to observe before training
 TOTAL_EXPLORE = 30_000 # 3000000. # frames over which to anneal epsilon
 INITIAL_EPSILON = 0.1 # starting value of epsilon
 FINAL_EPSILON = 0.0001 # final value of epsilon
@@ -137,7 +137,7 @@ def q_learning(mode, filename=None):
     if mode == 'test':
         TOTAL_OBSERVATION = 1_000
     else:
-        TOTAL_OBSERVATION = 200
+        TOTAL_OBSERVATION = 3_200
 
     observe = TOTAL_OBSERVATION
     epsilon = INITIAL_EPSILON
