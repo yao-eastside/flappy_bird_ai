@@ -2,6 +2,8 @@
 import sys
 
 if (len(sys.argv) != 2):
+    print("usage: python test.py <model-file-name.h5>")
+    print("for example: python test.py model-00100000.h5")
     exit()
 
 try:
