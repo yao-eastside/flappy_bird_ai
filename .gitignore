@@ -135,3 +135,6 @@ model.json
 output.txt
 backup/
 NOTES
+model*.h5
+model*.json
+new-output.txt

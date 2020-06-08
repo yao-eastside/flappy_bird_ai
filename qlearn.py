@@ -113,8 +113,8 @@ def train_network(queue, network):
 
 def logging(t, time0, network, observe, epsilon, action_index, r_t, Q_sa, loss, total_loss):
     # save progress every 10000 iterations
-    if t % 1000 == 0:
-        save_model(network)
+    if t % 10_000 == 0:
+        save_model(network, t)
 
     # print info
     state = "train"
@@ -138,10 +138,10 @@ def logging(t, time0, network, observe, epsilon, action_index, r_t, Q_sa, loss, 
     )
 
 
-def save_model(network):
+def save_model(network, t):
     print("Now we save model")
-    network.save_weights("model.h5", overwrite=True)
-    with open("model.json", "w") as outfile:
+    network.save_weights(f"model-{t:08d}.h5", overwrite=True)
+    with open(f"model-{t:08d}.json", "w") as outfile:
         json.dump(network.to_json(), outfile)
 
 
@@ -172,7 +172,7 @@ def q_learning(mode):
     game_state = game.GameState()
 
     # store the previous observations in replay memory
-    queue = deque()
+    queue = deque(maxlen=REPLAY_MEMORY)
 
     s_t0 = get_init_stack(game_state)
 
@@ -193,7 +193,7 @@ def q_learning(mode):
 
         queue.append((s_t0, action_index, r_t, s_t1, terminal))
         if len(queue) > REPLAY_MEMORY:
-            queue.popleft()
+            assert False
 
         if t > observe:
             # only train if done observing
