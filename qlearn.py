@@ -27,7 +27,7 @@ FRAME_PER_ACTION = 1
 LEARNING_RATE = 1e-4
 
 
-def init_network(mode, observe, epsilon):
+def init_network(observe, epsilon, mode, filename=None):
     print("Now we init the network")
 
     img_rows, img_cols = 80, 80
@@ -49,7 +49,11 @@ def init_network(mode, observe, epsilon):
         observe = 999999999 # We keep observe, never train
         epsilon = FINAL_EPSILON
         print ("Now we load weight")
-        network.load_weights("model.h5")
+        try:
+            network = keras.models.load_model(filename)
+        except (OSError, IOError) as e:
+            print(e)
+            exit()
         print ("Weight load successfully")
         print("***** We are in testing mode *****")
     else:
@@ -140,9 +144,7 @@ def logging(t, time0, network, observe, epsilon, action_index, r_t, Q_sa, loss, 
 
 def save_model(network, t):
     print("Now we save model")
-    network.save_weights(f"model-{t:08d}.h5", overwrite=True)
-    with open(f"model-{t:08d}.json", "w") as outfile:
-        json.dump(network.to_json(), outfile)
+    network.save(f"model-{t:08d}.h5", overwrite=True)
 
 
 def chose_action(network, s_t, a_t, t, epsilon):
@@ -166,7 +168,7 @@ def q_learning(mode, filename=None):
     epsilon = INITIAL_EPSILON
 
     # init network
-    network = init_network(mode, observe, epsilon)
+    network = init_network(observe, epsilon, mode, filename)
 
     # open up a game state to communicate with emulator
     game_state = game.GameState()
