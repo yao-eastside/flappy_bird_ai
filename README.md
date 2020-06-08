@@ -17,7 +17,7 @@
 * create a venv and activiate it: python3 -m venv .venv; source .venv/bin/activate
 * pip install -r req.txt, ignore errors/warnings related to tensorflow
 * config plaidml by running plaidml-setup. Choose no for experimental in step 1; choose your graphics card in step 2. (https://github.com/zhaoshaojun/flappy_bird_ai/blob/master/plaidml-setup/.plaidml)
-* modify ~/.keras/keras.json by referring to https://github.com/zhaoshaojun/flappy_bird_ai/blob/master/plaidml-setup/keras.json
+* config your backend to be plaidml by modifing ~/.keras/keras.json (https://github.com/zhaoshaojun/flappy_bird_ai/blob/master/plaidml-setup/keras.json). If you do not have this file in your system, run touch ~/.keras/keras.json first, and copy the content over.
 * done
 
 ## How to Run?
