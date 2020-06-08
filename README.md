@@ -26,6 +26,10 @@
 ```
 python train.py
 ```
+or
+```
+./start-train.sh
+```
 
 * Test
 ```
