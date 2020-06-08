@@ -16,12 +16,12 @@
 ```
 python train.py
 ```
-It will generate a few h5 files you can use in the test stage.
 
-* Test (you need to have "model.h5" created from training)
+* Test
 ```
 python test.py <model-file-name.h5>
 ```
+The <model-file-name.h5> file was generated in the training stage.
 
 ## Learn More about Reinforcement Learning
 * https://www.youtube.com/watch?v=lvoHnicueoE
