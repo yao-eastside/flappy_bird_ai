@@ -13,10 +13,11 @@
 ## Installation
 * You have a Mac (other machines should work as well)
 * install Python 3.7.2 (Python 3.6+ should work just fine)
-* create a venv and activiate it
-* pip install -r req.txt
+* verify your python version: python3 --version
+* create a venv and activiate it: python3 -m venv .venv; source .venv/bin/activate
+* pip install -r req.txt, ignore errors/warnings related to tensorflow
 * config plaidml by running plaidml-setup
-* modify ~/.keras/keras.json and ~/.plaidml by referring to the examples in setup-plaidml
+* modify ~/.keras/keras.json by referring to the examples in setup-plaidml
 * done
 
 ## How to Run?
