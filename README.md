@@ -10,6 +10,13 @@
 * Python 3.6+
 * pip install -r req.txt
 
+## Installation
+* install Python 3.7.2 (Python 3.6+ should work just fine)
+* create a venv and source to activiate it
+* pip install -r req.txt
+* config plaidml by running setup-plaidml
+* done
+
 ## How to Run?
 
 * Train the network
