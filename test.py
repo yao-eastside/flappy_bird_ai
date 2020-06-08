@@ -1,18 +1,13 @@
 #!/usr/bin/env python
+import sys
 
-import argparse
-
-parser = argparse.ArgumentParser(description='Deep Reinforcement Learning for Flappy Bird on macOS')
-parser.add_argument('-m','--mode', help='train | test', required=True)
-args = vars(parser.parse_args())
-mode = None
-if args['mode'] == 'test':
-    mode = 'test'
-elif args['mode'] == 'train':
-    mode = 'train'
-else:
-    parser.print_help()
+if (len(sys.argv) != 2):
     exit()
 
-from qlearn import q_learning
-q_learning(mode)
+try:
+    filename = sys.argv[1]
+    with open(filename, 'r') as fh:
+        from qlearn import q_learning
+        q_learning("test", fh)
+except (OSError, IOError) as e:
+    print(e)
