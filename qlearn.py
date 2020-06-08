@@ -160,7 +160,7 @@ def chose_action(network, s_t, a_t, t, epsilon):
     return action_index
 
 
-def q_learning(mode):
+def q_learning(mode, filename=None):
 
     observe = TOTAL_OBSERVATION
     epsilon = INITIAL_EPSILON
@@ -192,8 +192,6 @@ def q_learning(mode):
         s_t1, r_t, terminal = get_next_stack(game_state, a_t, s_t0)
 
         queue.append((s_t0, action_index, r_t, s_t1, terminal))
-        if len(queue) > REPLAY_MEMORY:
-            assert False
 
         if t > observe:
             # only train if done observing
@@ -211,5 +209,6 @@ def q_learning(mode):
 
 
 if __name__ == '__main__':
+    # make TOTAL_OBSERVATION much smaller, and call train directly
     TOTAL_OBSERVATION = 32
     q_learning('train')
