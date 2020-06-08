@@ -14,6 +14,8 @@ import skimage.transform
 from keras import layers, models
 
 from game import wrapped_flappy_bird as game
+from util import logging
+
 
 ACTIONS = 2 # number of valid actions
 GAMMA = 0.99 # decay rate of past observations
@@ -115,38 +117,6 @@ def train_network(queue, network):
     return loss, Q_sa
 
 
-def logging(t, time0, network, observe, epsilon, action_index, r_t, Q_sa, loss, total_loss):
-    # save progress every 10000 iterations
-    if t % 10_000 == 0:
-        save_model(network, t)
-
-    # print info
-    state = "train"
-    if t <= observe:
-        state = "observe"
-    elif t > observe and t <= observe + TOTAL_EXPLORE:
-        state = "explore"
-
-    now = datetime.now()
-    print(
-        now,
-        "timespent:", str(timedelta(seconds=time.time() - time0)),
-        "TIMESTEP:", t,
-        "STATE:", state,
-        "EPSILON:", epsilon,
-        "ACTION:", action_index,
-        "REWARD:", r_t,
-        "Q_MAX:" , np.max(Q_sa),
-        "Loss:", loss,
-        "avgloss:", total_loss/(t+1)
-    )
-
-
-def save_model(network, t):
-    print("Now we save model")
-    network.save(f"model-{t:08d}.h5", overwrite=True)
-
-
 def chose_action(network, s_t, a_t, t, epsilon):
     #choose an action epsilon greedy
     if t % FRAME_PER_ACTION == 0:
@@ -204,7 +174,7 @@ def q_learning(mode, filename=None):
         total_loss += loss
         s_t0, t = s_t1, t + 1
 
-        logging(t, time0, network, observe, epsilon, action_index, r_t, q_sa, loss, total_loss)
+        logging(mode, t, time0, network, observe, epsilon, action_index, r_t, q_sa, loss, total_loss, TOTAL_EXPLORE)
 
     print("Episode finished!")
     print("************************")
