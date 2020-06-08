@@ -16,8 +16,8 @@
 * pip install -r req.txt
 * config plaidml by running plaidml-setup
 * modify two files by referring to the examples in setup-plaidml
--- modify ~/.keras/keras.json
--- modify ~/.plaidml
+  ** modify ~/.keras/keras.json
+  ** modify ~/.plaidml
 * done
 
 ## How to Run?
