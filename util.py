@@ -19,7 +19,7 @@ from game import wrapped_flappy_bird as game
 def logging(mode, t, time0, network, observe, epsilon, action_index, r_t, Q_sa, loss, total_loss, total_explore):
     # save progress every 10000 iterations
     # if t % 10_000 == 0:
-    if t % 1_000 == 0:
+    if t % 10_000 == 0:
         if mode == 'train':
             print("saving the model...")
             network.save(f"model-{t:08d}.h5", overwrite=True)
