@@ -135,7 +135,9 @@ def chose_action(network, s_t, a_t, t, epsilon):
 def q_learning(mode, filename=None):
 
     if mode == 'test':
-        TOTAL_OBSERVATION = 1000
+        TOTAL_OBSERVATION = 1_000
+    else:
+        TOTAL_OBSERVATION = 200
 
     observe = TOTAL_OBSERVATION
     epsilon = INITIAL_EPSILON
