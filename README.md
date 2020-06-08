@@ -11,6 +11,7 @@
 * pip install -r req.txt
 
 ## Installation
+* You have a Mac (other machines should work as well)
 * install Python 3.7.2 (Python 3.6+ should work just fine)
 * create a venv and activiate it
 * pip install -r req.txt
