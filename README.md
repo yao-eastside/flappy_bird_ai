@@ -42,6 +42,6 @@ The <model-file-name.h5> file was generated in the training stage.
 * http://cs231n.stanford.edu/slides/2017/cs231n_2017_lecture14.pdf
 
 ## Credits
-Modified from https://github.com/yanpanlau/Keras-FlappyBird
+Modified from the outdated https://github.com/yanpanlau/Keras-FlappyBird
 
 
