@@ -44,4 +44,7 @@ The <model-file-name.h5> file was generated in the training stage.
 ## Credits
 Modified from https://github.com/yanpanlau/Keras-FlappyBird
 
+## Note
+just for fun
+
 
